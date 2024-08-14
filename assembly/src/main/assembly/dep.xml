@@ -1,0 +1,48 @@
+<assembly>
+  <id>dist</id>
+  <formats>
+    <format>tar.gz</format>
+    <format>tar.bz2</format>
+    <format>zip</format>
+  </formats>
+
+
+  <fileSets>
+    <fileSet>
+      <includes>
+        <include>README.md</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>
+        ${project.parent.basedir}/bin/
+      </directory>
+      <outputDirectory>bin</outputDirectory>
+      <includes>
+        <include>**/*</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>
+        ${project.parent.basedir}/server/src/main/resources
+      </directory>
+      <outputDirectory>conf</outputDirectory>
+      <includes>
+        <include>config.json</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+  <dependencySets>
+    <dependencySet>
+      <outputDirectory>lib</outputDirectory>
+      <useTransitiveDependencies>true</useTransitiveDependencies>
+      <useTransitiveFiltering>true</useTransitiveFiltering>
+      <unpack>false</unpack>
+      <scope>runtime</scope>
+      <useProjectArtifact>false</useProjectArtifact>
+      <includes>
+        <include>io.malachai.datafaker:*:jar</include>
+      </includes>
+    </dependencySet>
+  </dependencySets>
+</assembly>
