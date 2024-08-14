@@ -22,9 +22,6 @@ public class App {
         ConstraintManager constraintManager = new ConstraintManager(entityManager);
         DataSourceManager dataSourceManager = new DataSourceManager(entityManager);
 
-        constraintManager.initialize(new ArrayList<>(entityManager.getTables().keySet()));
-        dataSourceManager.initialize(new ArrayList<>(entityManager.getSources().keySet()));
-
         // 테이블 별 스레드 생성
         List<TableAppender> appenders = new ArrayList<>();
         try {

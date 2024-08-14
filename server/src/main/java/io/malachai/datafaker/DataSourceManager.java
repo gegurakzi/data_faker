@@ -2,6 +2,7 @@ package io.malachai.datafaker;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ public class DataSourceManager {
 
     public DataSourceManager(EntityManager entityManager) {
         this.entityManager = entityManager;
+        initialize(new ArrayList<>(entityManager.getSources().keySet()));
     }
 
     public void initialize(List<Long> keys) {

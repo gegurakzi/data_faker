@@ -1,6 +1,7 @@
 package io.malachai.datafaker;
 
 import io.malachai.datafaker.exception.TableNotInitializedException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,6 +13,7 @@ public class ConstraintManager {
 
     public ConstraintManager(EntityManager entityManager) {
         this.entityManager = entityManager;
+        initialize(new ArrayList<>(entityManager.getTables().keySet()));
     }
 
     public void initialize(List<Long> keys) {
