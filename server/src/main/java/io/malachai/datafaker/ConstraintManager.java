@@ -13,7 +13,7 @@ public class ConstraintManager {
 
     public ConstraintManager(EntityManager entityManager) {
         this.entityManager = entityManager;
-        initialize(new ArrayList<>(entityManager.getTables().keySet()));
+        initialize(new ArrayList<>(this.entityManager.getTables().keySet()));
     }
 
     public void initialize(List<Long> keys) {
@@ -23,7 +23,7 @@ public class ConstraintManager {
 
     public void increasePrimaryKey(Long tableKey) {
         Long primaryKey = primaryKeys.get(tableKey);
-        if (primaryKey < 0) {
+        if (primaryKey < 0L) {
             primaryKey = 0L;
         }
         primaryKey += 1;

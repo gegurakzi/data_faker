@@ -1,6 +1,7 @@
 package io.malachai.datafaker;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +21,16 @@ public class DataSourceManager {
     }
 
     public void initialize(List<Long> keys) {
-        keys.forEach(this::createDBCP);
+        keys.forEach(k -> {
+            Source source = entityManager.getSources().get(k);
+            switch (source.getType()) {
+                case JDBC:
+                    createDBCP(k);
+                    break;
+                case CONSOLE:
+
+            }
+        });
     }
 
     public void createDBCP(Long sourceKey) {
@@ -32,12 +42,24 @@ public class DataSourceManager {
         ));
     }
 
-    public Connection getConnection(Long sourceKey) {
-        try {
-            return dataSources.get(sourceKey).getConnection();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+    public void execute(Long sourceKey, String statement) throws SQLException {
+        Source source = entityManager.getSources().get(sourceKey);
+        switch (source.getType()) {
+            case JDBC:
+                try (Connection connection = dataSources.get(sourceKey).getConnection()) {
+                    connection.setAutoCommit(false);
+                    PreparedStatement pstmt = connection.prepareStatement(statement);
+                    pstmt.execute();
+                    connection.commit();
+                    return;
+                } catch (SQLException e) {
+                    throw e;
+                }
+            case CONSOLE:
+                System.out.println(String.format("Source [%s]: %s", source.getName(), statement));
+                return;
         }
+
     }
 
 }

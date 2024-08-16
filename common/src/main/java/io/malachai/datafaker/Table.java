@@ -6,11 +6,13 @@ public class Table {
 
     private String fullName;
     private Long sparsity;
+    private String updateMode;
     private List<Column> columns;
 
-    public Table(String fullName, Long sparsity, List<Column> columns) {
+    public Table(String fullName, Long sparsity, String updateMode, List<Column> columns) {
         this.fullName = fullName;
         this.sparsity = sparsity;
+        this.updateMode = updateMode;
         this.columns = columns;
     }
 
@@ -24,6 +26,10 @@ public class Table {
 
     public Long getSparsity() {
         return sparsity;
+    }
+
+    public String getUpdateMode() {
+        return updateMode;
     }
 
     public String getSourceName() {

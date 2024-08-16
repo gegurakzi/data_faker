@@ -28,6 +28,10 @@ public class JSONConfigParser implements ConfigParser {
     private static final String TABLE_NAME = "name";
     private static final String TABLE_SPARSITY = "sparsity";
     private static final Long DEFAULT_TABLE_SPARSITY = 10000L;
+    private static final String TABLE_UPDATE_MODE = "update";
+    private static final String DEFAULT_TABLE_UPDATE_MODE = "random";
+    private static final String TABLE_INITIAL_PRIMARY_KEY = "initialPrimaryKey";
+    private static final Long DEFAULT_TABLE_INITIAL_PRIMARY_KEY = 0L;
     private static final String COLUMNS = "columns";
     private static final String COLUMN_NAME = "name";
     private static final String COLUMN_TYPE = "type";
@@ -74,6 +78,7 @@ public class JSONConfigParser implements ConfigParser {
                     final Table table = new Table(
                         tableFullName,
                         getTableSparsity(tableObj),
+                        getUpdateMode(tableObj),
                         columns
                     );
                     tables.add(table);
@@ -121,6 +126,20 @@ public class JSONConfigParser implements ConfigParser {
             return DEFAULT_COLUMN_CONSTRAINT;
         }
         return ConstraintType.valueOf(jsonObj.get(COLUMN_CONSTRAINT).toString().toUpperCase());
+    }
+
+    public Long getInitialPrimaryKey(JSONObject jsonObj) {
+        if (jsonObj.get(TABLE_INITIAL_PRIMARY_KEY) == null) {
+            return DEFAULT_TABLE_INITIAL_PRIMARY_KEY;
+        }
+        return Long.parseLong(jsonObj.get(TABLE_INITIAL_PRIMARY_KEY).toString());
+    }
+
+    public String getUpdateMode(JSONObject jsonObj) {
+        if (jsonObj.get(TABLE_UPDATE_MODE) == null) {
+            return DEFAULT_TABLE_UPDATE_MODE;
+        }
+        return jsonObj.get(TABLE_UPDATE_MODE).toString();
     }
 
 }

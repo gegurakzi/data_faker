@@ -23,16 +23,34 @@ public class App {
         DataSourceManager dataSourceManager = new DataSourceManager(entityManager);
 
         // 테이블 별 스레드 생성
-        List<TableAppender> appenders = new ArrayList<>();
+        List<TableAppendThread> appenders = new ArrayList<>();
+        List<TableUpdateThread> updaters = new ArrayList<>();
         try {
+            // INSERT 커맨드
             for (Map.Entry<Long, Table> tableEntry : entityManager.getTables().entrySet()) {
-                TableAppender appender = new TableAppender(tableEntry.getValue(), entityManager,
+                TableAppendThread appender = new TableAppendThread(tableEntry.getValue(),
+                    entityManager,
                     constraintManager,
                     dataSourceManager);
                 appenders.add(appender);
             }
+            // UPDATE 커맨드
+            for (Map.Entry<Long, Table> tableEntry : entityManager.getTables().entrySet()) {
+                String updateMode = tableEntry.getValue().getUpdateMode();
+                switch (updateMode) {
+                    case "random":
+                        TableUpdateThread updater = new TableUpdateThread(tableEntry.getValue(),
+                            entityManager,
+                            constraintManager,
+                            dataSourceManager);
+                        updaters.add(updater);
+                        break;
+                }
+            }
+
             // 적재 시작
             appenders.forEach(Thread::start);
+            updaters.forEach(Thread::start);
         } catch (Exception e) {
             e.printStackTrace();
             appenders.forEach(Thread::interrupt);
