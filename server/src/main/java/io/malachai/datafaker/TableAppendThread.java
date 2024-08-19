@@ -7,9 +7,13 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class TableAppendThread extends Thread {
+
+    private static Logger LOG = Logger.getLogger(TableAppendThread.class.getName());
 
     private final Long tableKey;
     private final Table table;
@@ -115,13 +119,14 @@ public class TableAppendThread extends Thread {
                 params.put(field.getName(), field.getType(), faker.get(field.getKind()));
             }
 
+            String query = mapStatement(params);
             try {
-                dataSourceManager.execute(entityManager.getSourceKey(table.getSourceName()),
-                    mapStatement(params));
+                LOG.log(Level.INFO, "Executing: " + query);
+                dataSourceManager.execute(entityManager.getSourceKey(table.getSourceName()), query);
+                constraintManager.increasePrimaryKey(tableKey);
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                LOG.log(Level.WARNING, "SQLException:" + e.getMessage());
             }
-            constraintManager.increasePrimaryKey(tableKey);
             sleepWithoutException(table.getSparsity());
         }
 

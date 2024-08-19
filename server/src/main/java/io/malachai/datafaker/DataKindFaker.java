@@ -1,15 +1,31 @@
 package io.malachai.datafaker;
 
 import com.github.javafaker.Faker;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class DataKindFaker {
 
     private final Faker faker = new Faker();
+    private final Random random = new Random();
 
     public String get(String kind) {
         String[] params = kind.split("\\.");
         switch (params[0]) {
+            case "number":
+                if (params.length > 1) {
+                    switch (params[1]) {
+                        case "boolean":
+                            return String.valueOf(random.nextBoolean());
+                        case "under10":
+                            return String.valueOf(faker.number().numberBetween(0, 10));
+                        case "under100":
+                            return String.valueOf(faker.number().numberBetween(1, 100));
+                    }
+                }
+                return faker.number().digit();
             case "address":
                 if (params.length > 1) {
                     switch (params[1]) {
@@ -39,6 +55,10 @@ public class DataKindFaker {
             case "internet":
                 if (params.length > 1) {
                     switch (params[1]) {
+                        case "uuid":
+                            return faker.internet().uuid();
+                        case "role":
+                            return "USER";
                         case "avatar":
                             return faker.internet().avatar();
                         case "password":
@@ -83,7 +103,28 @@ public class DataKindFaker {
                             return faker.job().title();
                     }
                 }
-                return faker.job().toString();
+                return faker.job().title();
+            case "business":
+                if (params.length > 1) {
+                    switch (params[1]) {
+                        case "creditCardType":
+                            return faker.business().creditCardType();
+                    }
+                }
+                return faker.business().creditCardNumber();
+            case "commerce":
+                if (params.length > 1) {
+                    switch (params[1]) {
+                        case "price":
+                            return faker.commerce().price();
+                        case "points":
+                            return faker.number().numberBetween(1, 1000) + "00";
+                        case "rank":
+                            List<String> list = Arrays.asList("VIP", "VVIP", "MVP");
+                            return list.get(random.nextInt(list.size()));
+                    }
+                }
+                return faker.commerce().productName();
             default:
                 return faker.lorem().characters(255);
         }

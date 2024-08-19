@@ -8,9 +8,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class TableUpdateThread extends Thread {
+
+    private static Logger LOG = Logger.getLogger(TableAppendThread.class.getName());
 
     private final Long tableKey;
     private final Table table;
@@ -79,11 +83,13 @@ public class TableUpdateThread extends Thread {
                 params.put(field.getName(), field.getType(), faker.get(field.getKind()));
             }
 
+            String query = mapStatement(params);
             try {
+                LOG.log(Level.INFO, "Executing: " + query);
                 dataSourceManager.execute(entityManager.getSourceKey(table.getSourceName()),
                     mapStatement(params));
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                LOG.log(Level.WARNING, "SQLException:" + e.getMessage());
             }
             sleepWithoutException(table.getSparsity());
         }
