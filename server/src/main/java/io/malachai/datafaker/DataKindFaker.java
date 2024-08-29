@@ -115,6 +115,10 @@ public class DataKindFaker {
             case "commerce":
                 if (params.length > 1) {
                     switch (params[1]) {
+                        case "productName":
+                            return faker.commerce().productName();
+                        case "department":
+                            return faker.commerce().department();
                         case "price":
                             return faker.commerce().price();
                         case "points":
@@ -125,6 +129,14 @@ public class DataKindFaker {
                     }
                 }
                 return faker.commerce().productName();
+            case "lorem":
+                if (params.length > 1) {
+                    switch (params[1]) {
+                        case "characters":
+                            return faker.lorem().characters(255);
+                    }
+                }
+                return faker.lorem().characters(255);
             default:
                 return faker.lorem().characters(255);
         }
