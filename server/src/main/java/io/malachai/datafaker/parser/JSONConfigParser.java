@@ -26,8 +26,10 @@ public class JSONConfigParser implements ConfigParser {
     private static final String SOURCE_PASSWORD = "password";
     private static final String TABLES = "tables";
     private static final String TABLE_NAME = "name";
-    private static final String TABLE_SPARSITY = "sparsity";
-    private static final Long DEFAULT_TABLE_SPARSITY = 10000L;
+    private static final String TABLE_INSERT_INTERVAL = "insertInterval";
+    private static final Long DEFAULT_TABLE_INSERT_INTERVAL = 10000L;
+    private static final String TABLE_UPDATE_INTERVAL = "updateInterval";
+    private static final Long DEFAULT_TABLE_UPDATE_INTERVAL = Long.MAX_VALUE;
     private static final String TABLE_UPDATE_MODE = "update";
     private static final String DEFAULT_TABLE_UPDATE_MODE = "random";
     private static final String TABLE_INITIAL_PRIMARY_KEY = "initialPrimaryKey";
@@ -77,8 +79,9 @@ public class JSONConfigParser implements ConfigParser {
                     }
                     final Table table = new Table(
                         tableFullName,
-                        getTableSparsity(tableObj),
+                        getTableInsertInterval(tableObj),
                         getUpdateMode(tableObj),
+                        getTableUpdateInterval(tableObj),
                         columns
                     );
                     tables.add(table);
@@ -114,11 +117,18 @@ public class JSONConfigParser implements ConfigParser {
         }
     }
 
-    public Long getTableSparsity(JSONObject jsonObj) {
-        if (jsonObj.get(TABLE_SPARSITY) == null) {
-            return DEFAULT_TABLE_SPARSITY;
+    public Long getTableInsertInterval(JSONObject jsonObj) {
+        if (jsonObj.get(TABLE_INSERT_INTERVAL) == null) {
+            return DEFAULT_TABLE_INSERT_INTERVAL;
         }
-        return Long.parseLong(jsonObj.get(TABLE_SPARSITY).toString());
+        return Long.parseLong(jsonObj.get(TABLE_INSERT_INTERVAL).toString());
+    }
+
+    public Long getTableUpdateInterval(JSONObject jsonObj) {
+        if (jsonObj.get(TABLE_UPDATE_INTERVAL) == null) {
+            return DEFAULT_TABLE_UPDATE_INTERVAL;
+        }
+        return Long.parseLong(jsonObj.get(TABLE_UPDATE_INTERVAL).toString());
     }
 
     public ConstraintType getColumnConstraint(JSONObject jsonObj) {

@@ -1,4 +1,4 @@
-package io.malachai.datafaker;
+package io.malachai.datafaker.util;
 
 public class ParamEntry {
 

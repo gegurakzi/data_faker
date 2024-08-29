@@ -1,5 +1,8 @@
 package io.malachai.datafaker;
 
+import io.malachai.datafaker.repeater.InsertStatementRepeater;
+import io.malachai.datafaker.repeater.StatementRepeater;
+import io.malachai.datafaker.repeater.UpdateStatementRepeater;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -16,44 +19,41 @@ public class App {
             entityManager = loader.load(new InputStreamReader(
                 Objects.requireNonNull(App.class.getResourceAsStream("/config.json"))));
         } catch (IOException e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
-        ConstraintManager constraintManager = new ConstraintManager(entityManager);
+        PrimaryKeyManager primaryKeyManager = new PrimaryKeyManager(entityManager);
         DataSourceManager dataSourceManager = new DataSourceManager(entityManager);
 
         // 테이블 별 스레드 생성
-        List<TableAppendThread> appenders = new ArrayList<>();
-        List<TableUpdateThread> updaters = new ArrayList<>();
+        List<StatementRepeater> repeaters = new ArrayList<>();
         try {
-            // INSERT 커맨드
             for (Map.Entry<Long, Table> tableEntry : entityManager.getTables().entrySet()) {
-                TableAppendThread appender = new TableAppendThread(tableEntry.getValue(),
+                // INSERT
+                StatementRepeater appender = new InsertStatementRepeater(
+                    new TableReserve(tableEntry.getValue()),
                     entityManager,
-                    constraintManager,
+                    primaryKeyManager,
                     dataSourceManager);
-                appenders.add(appender);
-            }
-            // UPDATE 커맨드
-            for (Map.Entry<Long, Table> tableEntry : entityManager.getTables().entrySet()) {
+                repeaters.add(appender);
+
+                // UPDATE
                 String updateMode = tableEntry.getValue().getUpdateMode();
                 switch (updateMode) {
                     case "random":
-                        TableUpdateThread updater = new TableUpdateThread(tableEntry.getValue(),
+                        StatementRepeater updater = new UpdateStatementRepeater(
+                            new TableReserve(tableEntry.getValue()),
                             entityManager,
-                            constraintManager,
+                            primaryKeyManager,
                             dataSourceManager);
-                        updaters.add(updater);
+                        repeaters.add(updater);
                         break;
                 }
             }
 
             // 적재 시작
-            appenders.forEach(Thread::start);
-            updaters.forEach(Thread::start);
+            repeaters.forEach(Thread::start);
         } catch (Exception e) {
-            e.printStackTrace();
-            appenders.forEach(Thread::interrupt);
+            repeaters.forEach(Thread::interrupt);
             throw new RuntimeException(e);
         }
 

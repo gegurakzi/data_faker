@@ -5,14 +5,17 @@ import java.util.List;
 public class Table {
 
     private String fullName;
-    private Long sparsity;
+    private Long insertInterval;
+    private Long updateInterval;
     private String updateMode;
     private List<Column> columns;
 
-    public Table(String fullName, Long sparsity, String updateMode, List<Column> columns) {
+    public Table(String fullName, Long insertInterval, String updateMode, Long updateInterval,
+        List<Column> columns) {
         this.fullName = fullName;
-        this.sparsity = sparsity;
+        this.insertInterval = insertInterval;
         this.updateMode = updateMode;
+        this.updateInterval = updateInterval;
         this.columns = columns;
     }
 
@@ -24,12 +27,16 @@ public class Table {
         return fullName;
     }
 
-    public Long getSparsity() {
-        return sparsity;
+    public Long getInsertInterval() {
+        return insertInterval;
     }
 
     public String getUpdateMode() {
         return updateMode;
+    }
+
+    public Long getUpdateInterval() {
+        return updateInterval;
     }
 
     public String getSourceName() {
@@ -38,10 +45,6 @@ public class Table {
 
     public List<Column> getColumns() {
         return columns;
-    }
-
-    public void addColumn(Column column) {
-        columns.add(column);
     }
 
 }

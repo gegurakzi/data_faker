@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ConstraintManager {
+public class PrimaryKeyManager {
 
     private final EntityManager entityManager;
     private volatile Map<Long, Long> primaryKeys = new ConcurrentHashMap<>();
 
-    public ConstraintManager(EntityManager entityManager) {
+    public PrimaryKeyManager(EntityManager entityManager) {
         this.entityManager = entityManager;
         initialize(new ArrayList<>(this.entityManager.getTables().keySet()));
     }
