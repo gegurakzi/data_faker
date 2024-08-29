@@ -7,10 +7,9 @@ import io.malachai.datafaker.EntityManager;
 import io.malachai.datafaker.PrimaryKeyManager;
 import io.malachai.datafaker.TableReserve;
 import io.malachai.datafaker.exception.TableNotInitializedException;
+import io.malachai.datafaker.util.CastUtil;
 import io.malachai.datafaker.util.ParamMap;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -61,22 +60,10 @@ public class InsertStatementRepeater extends StatementRepeater {
         for (Column timestamp : Stream.concat(tableReserve.getCreatedAt().stream(),
                 tableReserve.getUpdatedAt().stream())
             .collect(Collectors.toList())) {
-            Object value = null;
-            switch (timestamp.getType()) {
-                case "string":
-                case "timestamp":
-                    value = LocalDateTime.now().format(
-                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                    break;
-                case "date":
-                    value = LocalDateTime.now().format(
-                        DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                    break;
-                case "long":
-                    value = LocalDateTime.now()
-                        .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-            }
-            params.put(timestamp.getName(), timestamp.getType(), value);
+            params.put(
+                timestamp.getName(),
+                timestamp.getType(),
+                CastUtil.retrieve(LocalDateTime.now(), timestamp.getType()));
         }
         for (Column field : tableReserve.getFieldColumns()) {
             params.put(field.getName(), field.getType(), faker.get(field.getKind()));
@@ -90,20 +77,12 @@ public class InsertStatementRepeater extends StatementRepeater {
         sb.append("INSERT INTO ");
         sb.append(tableReserve.getTable().getName());
         sb.append(" (");
-        sb.append(String.join(",", params.keySet()));
+        sb.append(params.keySet().stream()
+            .map(CastUtil::toToken)
+            .collect(Collectors.joining(",")));
         sb.append(") VALUES (");
         sb.append(params.values().stream()
-            .map(p -> {
-                switch (p.getType()) {
-                    case "string":
-                        return String.format("\"%s\"", p.getObj().toString());
-                    case "timestamp":
-                    case "date":
-                        return String.format("'%s'", p.getObj().toString());
-                    default:
-                        return p.getObj().toString();
-                }
-            })
+            .map(p -> CastUtil.toToken(p.getObj(), p.getType()))
             .collect(Collectors.joining(",")));
         sb.append(")");
         return sb.toString();

@@ -7,10 +7,9 @@ import io.malachai.datafaker.EntityManager;
 import io.malachai.datafaker.PrimaryKeyManager;
 import io.malachai.datafaker.TableReserve;
 import io.malachai.datafaker.exception.TableNotInitializedException;
+import io.malachai.datafaker.util.CastUtil;
 import io.malachai.datafaker.util.ParamMap;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -43,22 +42,11 @@ public class UpdateStatementRepeater extends StatementRepeater {
                 key != 0L ? random.nextLong(key) : 0L);
         }
         for (Column updated : tableReserve.getUpdatedAt()) {
-            Object value = null;
-            switch (updated.getType()) {
-                case "string":
-                case "timestamp":
-                    value = LocalDateTime.now().format(
-                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                    break;
-                case "date":
-                    value = LocalDateTime.now().format(
-                        DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                    break;
-                case "long":
-                    value = LocalDateTime.now()
-                        .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-            }
-            params.put(updated.getName(), updated.getType(), value);
+            params.put(
+                updated.getName(),
+                updated.getType(),
+                CastUtil.retrieve(LocalDateTime.now(), updated.getType())
+            );
         }
         // field columns randomizer
         for (Column nonFinal : tableReserve.getNonFinalColumns()) {
@@ -79,17 +67,7 @@ public class UpdateStatementRepeater extends StatementRepeater {
             }
             sb.append(param.getKey());
             sb.append("=");
-            switch (param.getValue().getType()) {
-                case "string":
-                    sb.append(String.format("\"%s\"", param.getValue().getObj().toString()));
-                    break;
-                case "timestamp":
-                case "date":
-                    sb.append(String.format("'%s'", param.getValue().getObj().toString()));
-                    break;
-                default:
-                    sb.append(param.getValue().getObj().toString());
-            }
+            sb.append(CastUtil.toToken(param.getValue().getObj(), param.getValue().getType()));
             sb.append(", ");
         }
         sb.setLength(sb.length() - 2);
